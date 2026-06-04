@@ -1,0 +1,37 @@
+{
+  "name": "sql-to-model",
+  "displayName": "SQL to Model",
+  "description": "Converte CREATE TABLE SQL para Models/Entities/Interfaces",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "sql-to-model.converter",
+        "title": "SQL to Model: Converter CREATE TABLE para Model"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "sql-to-model.converter",
+        "key": "ctrl+shift+m",
+        "mac": "cmd+shift+m"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "20.x",
+    "typescript": "^5.0.0"
+  }
+}
