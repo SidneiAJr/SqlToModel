@@ -8,6 +8,20 @@
 
 ---
 
+## ⚠️ Aviso importante
+
+> **Status:** Versão inicial (0.0.1) - Testada principalmente com **MySQL/MariaDB**
+> 
+> **Suporte atual:**
+> - ✅ MySQL / MariaDB (completo)
+> - ⚠️ PostgreSQL (parcial - tipos básicos funcionam)
+> - ⚠️ SQL Server (parcial)
+> - ❌ Oracle (não testado)
+>
+> **Em breve:** PostgreSQL completo, SQLite, suporte a arrays e JSON
+
+---
+
 ## 🎯 O que faz
 
 Selecione um `CREATE TABLE` SQL e converta para:
@@ -29,13 +43,19 @@ Selecione um `CREATE TABLE` SQL e converta para:
 3. Pesquise: `SQL to Model`
 4. Clique em **Install**
 
+---
+
 ## 🚀 Como usar
+
+### Passo 1 — Tenha um CREATE TABLE
+
 ```sql
 CREATE TABLE usuarios (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    ativo BOOLEAN DEFAULT TRUE
+    ativo BOOLEAN DEFAULT TRUE,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
@@ -44,3 +64,20 @@ CREATE TABLE usuarios (
 - Pressione Ctrl+Shift+P (ou Cmd+Shift+P)
 - Digite: SQL to Model: Converter
 - Escolha o formato desejado
+
+# 📊 Tabela: usuarios
+
+## Colunas
+
+| Coluna | Tipo | Nulo | Padrão | Descrição |
+|--------|------|------|--------|-----------|
+| id | BIGINT | ❌ | AUTO_INCREMENT | Chave primária |
+| nome | VARCHAR(100) | ❌ | - | - |
+| email | VARCHAR(255) | ❌ | UNIQUE | - |
+| ativo | BOOLEAN | ✅ | TRUE | - |
+| criado_em | TIMESTAMP | ✅ | CURRENT_TIMESTAMP | - |
+
+## Constraints
+
+- **PRIMARY KEY:** id
+- **UNIQUE:** email
