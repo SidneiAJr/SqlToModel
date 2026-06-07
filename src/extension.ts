@@ -1,8 +1,8 @@
 // src/extension.ts
 import * as vscode from 'vscode';
 import { converterTs } from './generators/SqlToTS';
-import { converterJavaLombok } from './generators/SqlTojavalomok';  // ← confira o nome do arquivo
-import { converterJavaNormal } from './generators/sqltojavaNormal';  // ← ADICIONAR
+import { converterJavaLombok } from './generators/SqlTojavalomok';  // ✅ nome correto
+import { converterJavaNormal } from './generators/sqltojavaNormal';  // ✅ nome correto
 import { converterJs } from './generators/SqlToJs';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -12,66 +12,52 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showErrorMessage('Abra um arquivo com SQL primeiro');
             return;
         }
-        
+
         const sqlSelecionado = editor.document.getText(editor.selection);
         if (!sqlSelecionado || !sqlSelecionado.toLowerCase().includes('create table')) {
             vscode.window.showErrorMessage('Selecione um comando CREATE TABLE SQL válido');
             return;
         }
-        
+
         // PASSO 1: ESCOLHER LINGUAGEM
+        // ✅ C# removido até estar implementado
         const linguagem = await vscode.window.showQuickPick(
-            ['TypeScript', 'JavaScript', 'Java', 'C#'],
+            ['TypeScript', 'JavaScript', 'Java (com Lombok)', 'Java (sem Lombok)'],
             { placeHolder: 'Para qual linguagem converter o model?' }
         );
-        
+
         if (!linguagem) return;
-        
+
         let resultado = '';
-        
-        // PASSO 2: SE FOR JAVA, PERGUNTAR QUAL ESTILO
-        if (linguagem === 'Java') {
-            const estiloJava = await vscode.window.showQuickPick(
-                [
-                    'Java com Lombok (recomendado)',
-                    'Java sem Lombok (getters/setters manuais)'
-                ],
-                { placeHolder: 'Qual estilo de Java você prefere?' }
-            );
-            
-            if (!estiloJava) return;
-            
-            if (estiloJava.includes('Lombok')) {
+
+        switch (linguagem) {
+            case 'TypeScript':
+                resultado = converterTs(sqlSelecionado);
+                break;
+            case 'JavaScript':
+                resultado = converterJs(sqlSelecionado);
+                break;
+            case 'Java (com Lombok)':
                 resultado = converterJavaLombok(sqlSelecionado);
-            } else {
+                break;
+            case 'Java (sem Lombok)':
                 resultado = converterJavaNormal(sqlSelecionado);
-            }
-        } 
-        // PASSO 3: OUTRAS LINGUAGENS
-        else {
-            switch (linguagem) {
-                case 'TypeScript':
-                    resultado = converterTs(sqlSelecionado);
-                    break;
-                case 'JavaScript':
-                    resultado = converterJs(sqlSelecionado);
-                    break;
-                case 'C#':
-                    // TODO: implementar converterCSharp
-                    vscode.window.showErrorMessage('C# ainda não implementado');
-                    return;
-            }
+                break;
         }
-        
-        // PASSO 4: INSERIR NO EDITOR
+
+        // ✅ Abre novo documento em vez de inserir no arquivo SQL
+        // Evita output duplicado e não polui o arquivo original
         if (resultado) {
-            editor.edit(editBuilder => {
-                editBuilder.insert(editor.selection.active, resultado);
+            const extensao = linguagem.includes('Java') ? 'java' : linguagem === 'TypeScript' ? 'ts' : 'js';
+            const doc = await vscode.workspace.openTextDocument({
+                content: resultado,
+                language: extensao
             });
+            await vscode.window.showTextDocument(doc);
             vscode.window.showInformationMessage(`✅ Model ${linguagem} gerado!`);
         }
     });
-    
+
     context.subscriptions.push(disposable);
 }
 

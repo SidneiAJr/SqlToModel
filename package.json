@@ -1,5 +1,5 @@
 {
-  "name": "sql-to-model",
+  "name": "albertool-sql-to-model",
   "displayName": "SQL to Model",
   "description": "Converte CREATE TABLE SQL para Models/Entities/Interfaces",
   "version": "0.0.1",

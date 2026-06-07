@@ -11,7 +11,7 @@ function capitalizar(str: string): string {
 
 function mapearTipoTs(col: any): string {
     const tipoUpper = col.tipo.toUpperCase();
-    
+
     if (col.enumValues) return `${capitalizar(col.nome)}Enum`;
     if (tipoUpper.includes('INT')) return 'number';
     if (tipoUpper.includes('VARCHAR') || tipoUpper.includes('TEXT')) return 'string';
@@ -26,9 +26,9 @@ export function converterTs(sql: string): string {
     const tabelaInfo = parseCreateTable(sql);
     const { nome, colunas } = tabelaInfo;
     const nomeInterface = capitalizar(toCamelCase(nome));
-    
+
     let output = `// Gerado automaticamente de SQL\n\n`;
-    
+
     // Gerar enums primeiro
     const enums = colunas.filter(col => col.enumValues && col.enumValues.length > 0);
     for (const enumCol of enums) {
@@ -39,16 +39,17 @@ export function converterTs(sql: string): string {
         }
         output += `}\n\n`;
     }
-    
+
     // Gerar interface
     output += `export interface ${nomeInterface} {\n`;
     for (const col of colunas) {
         const tipoTs = mapearTipoTs(col);
         const nomeCampo = toCamelCase(col.nome);
-        const opcional = col.notNull || col.isPrimaryKey ? '' : '?';
+        // ✅ PK com AUTO_INCREMENT é opcional (banco gera o valor)
+        const opcional = col.notNull && !col.isPrimaryKey ? '' : '?';
         output += `    ${nomeCampo}${opcional}: ${tipoTs};\n`;
     }
     output += `}\n`;
-    
+
     return output;
 }
