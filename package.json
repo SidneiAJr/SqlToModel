@@ -3,6 +3,7 @@
   "displayName": "SQL to Model",
   "description": "Converte CREATE TABLE SQL para Models/Entities/Interfaces",
   "version": "0.0.1",
+  "publisher": "SidAlbertaodasmassa",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -33,5 +34,10 @@
     "@types/vscode": "^1.85.0",
     "@types/node": "20.x",
     "typescript": "^5.0.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SidAlbertaodasmassa/sql-to-model"
+  },
+  "license": "MIT"
 }
