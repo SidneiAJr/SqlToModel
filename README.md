@@ -76,8 +76,3 @@ CREATE TABLE usuarios (
 | email | VARCHAR(255) | ❌ | UNIQUE | - |
 | ativo | BOOLEAN | ✅ | TRUE | - |
 | criado_em | TIMESTAMP | ✅ | CURRENT_TIMESTAMP | - |
-
-## Constraints
-
-- **PRIMARY KEY:** id
-- **UNIQUE:** email
