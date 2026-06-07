@@ -1,7 +1,7 @@
 // src/extension.ts
 import * as vscode from 'vscode';
 import { converterTs } from './generators/SqlToTS';
-import { converterJavaLombok } from './generators/SqlTojavalomok';  // ✅ nome correto
+import { converterJavaLombok } from './generators/SqlTojavalomok';  
 import { converterJavaNormal } from './generators/sqltojavaNormal';  // ✅ nome correto
 import { converterJs } from './generators/SqlToJs';
 
