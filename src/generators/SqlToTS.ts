@@ -22,14 +22,15 @@ function mapearTipoTs(col: any): string {
     return 'any';
 }
 
-export function converterTs(sql: string): string {
+// Gera INTERFACE
+export function converterTsInterface(sql: string): string {
     const tabelaInfo = parseCreateTable(sql);
     const { nome, colunas } = tabelaInfo;
     const nomeInterface = capitalizar(toCamelCase(nome));
 
     let output = `// Gerado automaticamente de SQL\n\n`;
 
-    // Gerar enums primeiro
+    // Gerar enums
     const enums = colunas.filter(col => col.enumValues && col.enumValues.length > 0);
     for (const enumCol of enums) {
         const enumName = `${capitalizar(toCamelCase(enumCol.nome))}Enum`;
@@ -45,11 +46,62 @@ export function converterTs(sql: string): string {
     for (const col of colunas) {
         const tipoTs = mapearTipoTs(col);
         const nomeCampo = toCamelCase(col.nome);
-        // ✅ PK com AUTO_INCREMENT é opcional (banco gera o valor)
         const opcional = col.notNull && !col.isPrimaryKey ? '' : '?';
         output += `    ${nomeCampo}${opcional}: ${tipoTs};\n`;
     }
     output += `}\n`;
 
     return output;
+}
+
+// Gera CLASSE
+export function converterTsClass(sql: string): string {
+    const tabelaInfo = parseCreateTable(sql);
+    const { nome, colunas } = tabelaInfo;
+    const nomeClasse = capitalizar(toCamelCase(nome));
+
+    let output = `// Gerado automaticamente de SQL\n\n`;
+
+    // Gerar enums
+    const enums = colunas.filter(col => col.enumValues && col.enumValues.length > 0);
+    for (const enumCol of enums) {
+        const enumName = `${capitalizar(toCamelCase(enumCol.nome))}Enum`;
+        output += `export enum ${enumName} {\n`;
+        for (const val of enumCol.enumValues!) {
+            output += `    ${val.toUpperCase()} = '${val}',\n`;
+        }
+        output += `}\n\n`;
+    }
+
+    // Gerar classe
+    output += `export class ${nomeClasse} {\n`;
+    
+    // Propriedades
+    for (const col of colunas) {
+        const tipoTs = mapearTipoTs(col);
+        const nomeCampo = toCamelCase(col.nome);
+        const opcional = col.notNull && !col.isPrimaryKey ? '?' : '';
+        output += `    ${nomeCampo}${opcional}: ${tipoTs};\n`;
+    }
+    
+    // Construtor opcional
+    output += `\n    constructor(data?: Partial<${nomeClasse}>) {\n`;
+    output += `        if (data) {\n`;
+    for (const col of colunas) {
+        const nomeCampo = toCamelCase(col.nome);
+        output += `            this.${nomeCampo} = data.${nomeCampo};\n`;
+    }
+    output += `        }\n`;
+    output += `    }\n`;
+    output += `}\n`;
+
+    return output;
+}
+
+// FUNÇÃO PRINCIPAL (com opção)
+export function converterTs(sql: string, outputType: 'interface' | 'class' = 'interface'): string {
+    if (outputType === 'class') {
+        return converterTsClass(sql);
+    }
+    return converterTsInterface(sql);
 }

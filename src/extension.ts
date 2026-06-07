@@ -2,7 +2,7 @@
 import * as vscode from 'vscode';
 import { converterTs } from './generators/SqlToTS';
 import { converterJavaLombok } from './generators/SqlTojavalomok';  
-import { converterJavaNormal } from './generators/sqltojavaNormal';  // ✅ nome correto
+import { converterJavaNormal } from './generators/sqltojavaNormal';
 import { converterJs } from './generators/SqlToJs';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -20,7 +20,6 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         // PASSO 1: ESCOLHER LINGUAGEM
-        // ✅ C# removido até estar implementado
         const linguagem = await vscode.window.showQuickPick(
             ['TypeScript', 'JavaScript', 'Java (com Lombok)', 'Java (sem Lombok)'],
             { placeHolder: 'Para qual linguagem converter o model?' }
@@ -30,25 +29,38 @@ export function activate(context: vscode.ExtensionContext) {
 
         let resultado = '';
 
-        switch (linguagem) {
-            case 'TypeScript':
-                resultado = converterTs(sqlSelecionado);
-                break;
-            case 'JavaScript':
-                resultado = converterJs(sqlSelecionado);
-                break;
-            case 'Java (com Lombok)':
-                resultado = converterJavaLombok(sqlSelecionado);
-                break;
-            case 'Java (sem Lombok)':
-                resultado = converterJavaNormal(sqlSelecionado);
-                break;
+        // 🔥 SE FOR TS, PERGUNTAR SE QUER INTERFACE OU CLASSE
+        if (linguagem === 'TypeScript') {
+            const tsOutputType = await vscode.window.showQuickPick(
+                ['Interface (recomendado para frontend/API)', 'Classe (recomendado para backend/ORM)'],
+                { placeHolder: 'Tipo de saída para TypeScript?' }
+            );
+
+            if (!tsOutputType) return;
+
+            const isClass = tsOutputType.includes('Classe');
+            resultado = converterTs(sqlSelecionado, isClass ? 'class' : 'interface');
+        } else {
+            switch (linguagem) {
+                case 'JavaScript':
+                    resultado = converterJs(sqlSelecionado);
+                    break;
+                case 'Java (com Lombok)':
+                    resultado = converterJavaLombok(sqlSelecionado);
+                    break;
+                case 'Java (sem Lombok)':
+                    resultado = converterJavaNormal(sqlSelecionado);
+                    break;
+            }
         }
 
-        // ✅ Abre novo documento em vez de inserir no arquivo SQL
-        // Evita output duplicado e não polui o arquivo original
+        // Abre novo documento
         if (resultado) {
-            const extensao = linguagem.includes('Java') ? 'java' : linguagem === 'TypeScript' ? 'ts' : 'js';
+            let extensao = 'txt';
+            if (linguagem === 'TypeScript') extensao = 'ts';
+            else if (linguagem === 'JavaScript') extensao = 'js';
+            else if (linguagem.includes('Java')) extensao = 'java';
+
             const doc = await vscode.workspace.openTextDocument({
                 content: resultado,
                 language: extensao
